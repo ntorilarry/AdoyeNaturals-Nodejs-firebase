@@ -11,7 +11,7 @@ const {
   getDoc,
   updateDoc,
   getDocs,
-} = require("firebase/firestore/lite");
+} = require("firebase/firestore");
 const {
   getAuth,
   createUserWithEmailAndPassword,
@@ -45,13 +45,13 @@ app.get("/", function (req: any, res: { send: (arg0: string) => void }) {
 app.post(
   "/api/register",
   async function (
-    req: { body: { fName: any; email: any; phoneNumber: any; password: any } },
+    req: { body: { fullName: any; email: any; phoneNumber: any; password: any } },
     res: { json: (arg0: any) => void }
   ) {
     console.log(req.body);
 
     const userMap = {
-      fullName: `${req.body.fName}`,
+      fullName: `${req.body.fullName}`,
       email: `${req.body.email}`,
       phoneNumber: `${req.body.phoneNumber}`,
       password: `${req.body.password}`,
@@ -81,25 +81,31 @@ app.post(
   }
 );
 
-app.post(
-  "/api/latest-products",
-  async function (
-    req: { body: { topic: any; subtitle: any; content: any } },
-    res: { json: (arg0: any) => void }
-  ) {
+app.get(
+  "/api/login",
+  async function (req: { body: any }, res: { json: (arg0: any[]) => void }) {
     console.log(req.body);
-
-    const userMap = {
-      topic: `${req.body.topic}`,
-      subtitle: `${req.body.subtitle}`,
-      content: `${req.body.content}`,
-    };
-
-    const response = await createNews(JSON.stringify(userMap));
-    console.log(`news: ${JSON.stringify(response)}`);
+    const response = await getLoginUsers(db);
+    console.log(`students: ${JSON.stringify(response)}`);
     res.json(response);
   }
 );
+
+async function getLoginUsers(db: any) {
+  const products: any[] = [];
+  const colRef = collection(db, "users");
+  const querySnapshot = await getDocs(colRef);
+  console.log(`Heeeee: ${querySnapshot}`);
+  querySnapshot.forEach((doc: { id: any; data: () => any }) => {
+    // doc.data() is never undefined for query doc snapshots
+    console.log(doc.id, " => ", doc.data());
+    products.push(doc.data());
+  });
+
+  console.log(`Applicants: ${products}`);
+  return products;
+}
+
 
 app.get(
   "/api/latest-products",
@@ -110,12 +116,6 @@ app.get(
     res.json(response);
   }
 );
-
-app.get('/api/latest-products/:id', 
-function(req, res) {
-    
-    res.send('id: ' + req.params.id);
-});
 
 async function getProducts(db: any) {
   const products: any[] = [];
@@ -132,12 +132,24 @@ async function getProducts(db: any) {
   return products;
 }
 
+app.get('/api/latest-products/:id', async (req, res) => {
+  const id = req.params.id;
 
+  // Use the `db` instance to fetch data from Firebase based on the ID
+  const docRef = doc(db, 'latest products', id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    res.send(docSnap.data());
+  } else {
+    res.status(404).send('Document not found');
+  }
+});
 
 
 async function authenticateUser(userJson: any) {
   let user = JSON.parse(userJson);
-  const usersRef = collection(db, "Users");
+  const usersRef = collection(db, "users");
 
   const userMap = {
     fullName: `${user.fullName}`,
@@ -175,7 +187,7 @@ async function authenticateUser(userJson: any) {
 
 async function loginUser(userJson: any) {
   let user = JSON.parse(userJson);
-  const usersRef = collection(db, "Users");
+  const usersRef = collection(db, "users");
 
   const userMap = {
     email: `${user.email}`,
@@ -207,83 +219,55 @@ async function loginUser(userJson: any) {
   }
 }
 
-async function registerUser(userMap: string) {
-  let userDetails = JSON.parse(userMap);
+// async function registerUser(userMap: string) {
+//   let userDetails = JSON.parse(userMap);
 
-  const usersRef = collection(db, "Users");
-  const userDoc = {
-    email: `${userDetails.email}`,
-    driversExpiryDate: `${userDetails.driversExpiryDate}`,
-    driversLicense: `${userDetails.driversLicense}`,
-    vehicleType: `${userDetails.vehicleType}`,
-    nationalID: `${userDetails.nationalID}`,
-  };
+//   const usersRef = collection(db, "Users");
+//   const userDoc = {
+//     email: `${userDetails.email}`,
+//     driversExpiryDate: `${userDetails.driversExpiryDate}`,
+//     driversLicense: `${userDetails.driversLicense}`,
+//     vehicleType: `${userDetails.vehicleType}`,
+//     nationalID: `${userDetails.nationalID}`,
+//   };
 
-  try {
-    await updateDoc(doc(usersRef, userDetails.email), userDoc);
+//   try {
+//     await updateDoc(doc(usersRef, userDetails.email), userDoc);
 
-    //Check if the email is valid
+//     //Check if the email is valid
 
-    let user = await getUser(db, userDetails.email);
+//     let user = await getUser(db, userDetails.email);
 
-    let response = {
-      firstName: `${user.firstName}`,
-      lastName: `${user.lastName}`,
-      emergencyContact: `${user.emergencyContact}`,
-      phoneNumber: `${user.phoneNumber}`,
-      emergencyCell: `${user.emergencyCell}`,
-      address: `${user.address}`,
-      dob: `${user.dob}`,
-      gender: `${user.gender}`,
-      marriageStatus: `${user.marriageStatus}`,
-      email: `${user.email}`,
-      driversExpiryDate: `${user.driversExpiryDate}`,
-      driversLicense: `${user.driversLicense}`,
-      vehicleType: `${user.vehicleType}`,
-      nationalID: `${user.nationalID}`,
-      userStatus: "Registration Complete",
-    };
+//     let response = {
+//       firstName: `${user.firstName}`,
+//       lastName: `${user.lastName}`,
+//       emergencyContact: `${user.emergencyContact}`,
+//       phoneNumber: `${user.phoneNumber}`,
+//       emergencyCell: `${user.emergencyCell}`,
+//       address: `${user.address}`,
+//       dob: `${user.dob}`,
+//       gender: `${user.gender}`,
+//       marriageStatus: `${user.marriageStatus}`,
+//       email: `${user.email}`,
+//       driversExpiryDate: `${user.driversExpiryDate}`,
+//       driversLicense: `${user.driversLicense}`,
+//       vehicleType: `${user.vehicleType}`,
+//       nationalID: `${user.nationalID}`,
+//       userStatus: "Registration Complete",
+//     };
 
-    return response;
-  } catch (error) {
-    console.log(`Error is: ${error}`);
+//     return response;
+//   } catch (error) {
+//     console.log(`Error is: ${error}`);
 
-    const errorJson = {
-      error,
-    };
-    return errorJson;
-  }
-}
+//     const errorJson = {
+//       error,
+//     };
+//     return errorJson;
+//   }
+// }
 
-async function createNews(userMap: string) {
-  let userDetails = JSON.parse(userMap);
 
-  const usersRef = collection(db, "news");
-  const userDoc = {
-    topic: `${userDetails.topic}`,
-    subtitle: `${userDetails.subtitle}`,
-    content: `${userDetails.content}`,
-  };
-
-  console.log(`Received ${JSON.stringify(userDoc)}`);
-
-  try {
-    await addDoc(usersRef, userDoc);
-
-   let response = {
-      status: "Successful",
-    };
-
-    return response;
-  } catch (error) {
-    console.log(`Error is: ${error}`);
-
-    const errorJson = {
-      error,
-    };
-    return errorJson;
-  }
-}
 
 async function getUser(db: any, userEmail: any) {
   //if the email isn't valid here throw an error
