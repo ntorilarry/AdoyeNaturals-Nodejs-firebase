@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "music-album",
+  "name": "adoye naturals",
   "builds": [{ "src": "index.ts", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "/index.ts" }]
+  "routes": [{ "src": "/(.*)", "dest": "/src/index.ts" }]
 }
