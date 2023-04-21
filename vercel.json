@@ -1,6 +1,6 @@
 {
   "version": 2,
   "name": "adoye naturals",
-  "builds": [{ "src": "index.ts", "use": "@vercel/node" }],
+  "builds": [{ "src": "/src/index.ts", "use": "@vercel/node" }],
   "routes": [{ "src": "/(.*)", "dest": "/src/index.ts" }]
 }
