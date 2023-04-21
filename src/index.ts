@@ -16,6 +16,7 @@ const {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendEmailVerification,
 } = require("firebase/auth");
 
 const firebaseConfig = {
@@ -163,6 +164,7 @@ async function authenticateUser(userJson: any) {
   try {
     //auth
     await createUserWithEmailAndPassword(auth, user.email, user.password);
+    // sendEmailVerification(auth.currentUser)
 
     //storing
     await setDoc(doc(usersRef, user.email), userMap);
