@@ -39,9 +39,9 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get("/", function (req: any, res: { send: (arg0: string) => void }) {
-  res.send("<h1>Welcome</h1>");
-});
+// app.get("/", function (req: any, res: { send: (arg0: string) => void }) {
+//   res.send("<h1>Welcome</h1>");
+// });
 
 app.post(
   "/api/register",
