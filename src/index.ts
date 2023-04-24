@@ -147,6 +147,44 @@ app.get('/api/latest-products/:id', async (req, res) => {
   }
 });
 
+app.get(
+  "/api/soap",
+  async function (req: { body: any }, res: { json: (arg0: any[]) => void }) {
+    console.log(req.body);
+    const response = await getSoaps(db);
+    console.log(`students: ${JSON.stringify(response)}`);
+    res.json(response);
+  }
+);
+
+async function getSoaps(db: any) {
+  const products: any[] = [];
+  const colRef = collection(db, "soap");
+  const querySnapshot = await getDocs(colRef);
+  console.log(`soapy: ${querySnapshot}`);
+  querySnapshot.forEach((doc: { id: any; data: () => any }) => {
+    // doc.data() is never undefined for query doc snapshots
+    console.log(doc.id, " => ", doc.data());
+    products.push(doc.data());
+  });
+
+  console.log(`soaped: ${products}`);
+  return products;
+}
+
+app.get('/api/soap/:id', async (req, res) => {
+  const id = req.params.id;
+
+  // Use the `db` instance to fetch data from Firebase based on the ID
+  const docRef = doc(db, 'soap', id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    res.send(docSnap.data());
+  } else {
+    res.status(404).send('Document not found');
+  }
+});
 
 async function authenticateUser(userJson: any) {
   let user = JSON.parse(userJson);
