@@ -79,7 +79,6 @@ async function authenticateUser(userJson: any) {
   try {
     //auth
     await createUserWithEmailAndPassword(auth, user.email, user.password);
-    // sendEmailVerification(auth.currentUser)
 
     //storing
     await setDoc(doc(usersRef, user.email), userMap);
