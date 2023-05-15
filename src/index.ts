@@ -63,6 +63,45 @@ app.post(
   }
 );
 
+async function authenticateUser(userJson: any) {
+  let user = JSON.parse(userJson);
+  const usersRef = collection(db, "users");
+
+  const userMap = {
+    fullName: `${user.fullName}`,
+    email: `${user.email}`,
+    phoneNumber: `${user.phoneNumber}`,
+    password: `${user.password}`,
+  };
+
+  console.log(user);
+
+  try {
+    //auth
+    await createUserWithEmailAndPassword(auth, user.email, user.password);
+    // sendEmailVerification(auth.currentUser)
+
+    //storing
+    await setDoc(doc(usersRef, user.email), userMap);
+
+    userJson = {
+      fullName: `${user.fullName}`,
+      email: `${user.email}`,
+      phoneNumber: `${user.phoneNumber}`,
+      userStatus: "Saved",
+    };
+
+    return userJson;
+  } catch (error) {
+    console.log(`Error is: ${error}`);
+
+    const errorJson = {
+      error,
+    };
+    return errorJson;
+  }
+}
+
 app.post(
   "/api/login",
   async function (
@@ -81,6 +120,40 @@ app.post(
     res.json(response);
   }
 );
+
+async function loginUser(userJson: any) {
+  let user = JSON.parse(userJson);
+  const usersRef = collection(db, "users");
+
+  const userMap = {
+    email: `${user.email}`,
+    password: `${user.password}`,
+  };
+
+  try {
+    //auth
+    await signInWithEmailAndPassword(auth, user.email, user.password);
+
+    //getting
+    let userDoc = await getUser(db, user.email);
+
+    userJson = {
+      fullName: `${userDoc.fullName}`,
+      email: `${userDoc.email}`,
+      phoneNumber: `${userDoc.phoneNumber}`,
+      userStatus: "Logged in",
+    };
+
+    return userJson;
+  } catch (error) {
+    console.log(`Error is: ${error}`);
+
+    const errorJson = {
+      error,
+    };
+    return errorJson;
+  }
+}
 
 app.get(
   "/api/login",
@@ -186,112 +259,43 @@ app.get('/api/soap/:id', async (req, res) => {
   }
 });
 
-async function authenticateUser(userJson: any) {
-  let user = JSON.parse(userJson);
-  const usersRef = collection(db, "users");
 
-  const userMap = {
-    fullName: `${user.fullName}`,
-    email: `${user.email}`,
-    phoneNumber: `${user.phoneNumber}`,
-    password: `${user.password}`,
-  };
 
-  console.log(user);
 
-  try {
-    //auth
-    await createUserWithEmailAndPassword(auth, user.email, user.password);
-    // sendEmailVerification(auth.currentUser)
 
-    //storing
-    await setDoc(doc(usersRef, user.email), userMap);
+// async function registerUser(userMap: string) {
+//   let userDetails = JSON.parse(userMap);
 
-    userJson = {
-      fullName: `${user.fullName}`,
-      email: `${user.email}`,
-      phoneNumber: `${user.phoneNumber}`,
-      userStatus: "Saved",
-    };
+//   const usersRef = collection(db, "users");
+//   const userDoc = {
+//     email: `${userDetails.email}`,
+//   };
 
-    return userJson;
-  } catch (error) {
-    console.log(`Error is: ${error}`);
+//   try {
+//     await updateDoc(doc(usersRef, userDetails.email), userDoc);
 
-    const errorJson = {
-      error,
-    };
-    return errorJson;
-  }
-}
+//     //Check if the email is valid
 
-async function loginUser(userJson: any) {
-  let user = JSON.parse(userJson);
-  const usersRef = collection(db, "users");
+//     let user = await getUser(db, userDetails.email);
 
-  const userMap = {
-    email: `${user.email}`,
-    password: `${user.password}`,
-  };
-
-  try {
-    //auth
-    await signInWithEmailAndPassword(auth, user.email, user.password);
-
-    //getting
-    let userDoc = await getUser(db, user.email);
-
-    userJson = {
-      fullName: `${userDoc.fullName}`,
-      email: `${userDoc.email}`,
-      phoneNumber: `${userDoc.phoneNumber}`,
-      userStatus: "Logged in",
-    };
-
-    return userJson;
-  } catch (error) {
-    console.log(`Error is: ${error}`);
-
-    const errorJson = {
-      error,
-    };
-    return errorJson;
-  }
-}
-
-async function registerUser(userMap: string) {
-  let userDetails = JSON.parse(userMap);
-
-  const usersRef = collection(db, "users");
-  const userDoc = {
-    email: `${userDetails.email}`,
-  };
-
-  try {
-    await updateDoc(doc(usersRef, userDetails.email), userDoc);
-
-    //Check if the email is valid
-
-    let user = await getUser(db, userDetails.email);
-
-    let response = {
-      firstName: `${user.firstName}`,
-      lastName: `${user.lastName}`,
-      phoneNumber: `${user.phoneNumber}`,
-      email: `${user.email}`,
+//     let response = {
+//       firstName: `${user.firstName}`,
+//       lastName: `${user.lastName}`,
+//       phoneNumber: `${user.phoneNumber}`,
+//       email: `${user.email}`,
    
-    };
+//     };
 
-    return response;
-  } catch (error) {
-    console.log(`Error is: ${error}`);
+//     return response;
+//   } catch (error) {
+//     console.log(`Error is: ${error}`);
 
-    const errorJson = {
-      error,
-    };
-    return errorJson;
-  }
-}
+//     const errorJson = {
+//       error,
+//     };
+//     return errorJson;
+//   }
+// }
 
 
 
@@ -310,13 +314,19 @@ async function getUser(db: any, userEmail: any) {
     return;
   }
 
-  // const usersCollection = collection(db, 'Users');//Goes to Users collection
+}
+
+
+
+
+  // const usersCollection = collection(db, 'users');//Goes to Users collection
   // const usersSnapshot = await getDocs(usersCollection);//Goes to Specific Document
   // const usersList = usersSnapshot.docs.map(doc => doc.data());
   // console.log(usersList);
   // return usersList;
-}
 
 app.listen(process.env.PORT || 3001, function () {
   console.log("Server running on port 3001");
 });
+export { };
+
