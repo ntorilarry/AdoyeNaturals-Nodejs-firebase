@@ -262,13 +262,9 @@ async function loginUser(userJson: any) {
 async function registerUser(userMap: string) {
   let userDetails = JSON.parse(userMap);
 
-  const usersRef = collection(db, "Users");
+  const usersRef = collection(db, "users");
   const userDoc = {
     email: `${userDetails.email}`,
-    // driversExpiryDate: `${userDetails.driversExpiryDate}`,
-    // driversLicense: `${userDetails.driversLicense}`,
-    // vehicleType: `${userDetails.vehicleType}`,
-    // nationalID: `${userDetails.nationalID}`,
   };
 
   try {
@@ -281,19 +277,9 @@ async function registerUser(userMap: string) {
     let response = {
       firstName: `${user.firstName}`,
       lastName: `${user.lastName}`,
-      // emergencyContact: `${user.emergencyContact}`,
       phoneNumber: `${user.phoneNumber}`,
-      // emergencyCell: `${user.emergencyCell}`,
-      // address: `${user.address}`,
-      // dob: `${user.dob}`,
-      // gender: `${user.gender}`,
-      // marriageStatus: `${user.marriageStatus}`,
       email: `${user.email}`,
-      // driversExpiryDate: `${user.driversExpiryDate}`,
-      // driversLicense: `${user.driversLicense}`,
-      // vehicleType: `${user.vehicleType}`,
-      // nationalID: `${user.nationalID}`,
-      // userStatus: "Registration Complete",
+   
     };
 
     return response;
@@ -312,7 +298,7 @@ async function registerUser(userMap: string) {
 async function getUser(db: any, userEmail: any) {
   //if the email isn't valid here throw an error
 
-  const docRef = doc(db, "Users", userEmail);
+  const docRef = doc(db, "users", userEmail);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
