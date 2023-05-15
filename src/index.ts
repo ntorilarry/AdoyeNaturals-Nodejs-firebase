@@ -39,9 +39,9 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// app.get("/", function (req: any, res: { send: (arg0: string) => void }) {
-//   res.send("<h1>Welcome</h1>");
-// });
+app.get("/", function (req: any, res: { send: (arg0: string) => void }) {
+  res.send("<h1>Welcome</h1>");
+});
 
 app.post(
   "/api/register",
@@ -259,53 +259,53 @@ async function loginUser(userJson: any) {
   }
 }
 
-// async function registerUser(userMap: string) {
-//   let userDetails = JSON.parse(userMap);
+async function registerUser(userMap: string) {
+  let userDetails = JSON.parse(userMap);
 
-//   const usersRef = collection(db, "Users");
-//   const userDoc = {
-//     email: `${userDetails.email}`,
-//     driversExpiryDate: `${userDetails.driversExpiryDate}`,
-//     driversLicense: `${userDetails.driversLicense}`,
-//     vehicleType: `${userDetails.vehicleType}`,
-//     nationalID: `${userDetails.nationalID}`,
-//   };
+  const usersRef = collection(db, "Users");
+  const userDoc = {
+    email: `${userDetails.email}`,
+    // driversExpiryDate: `${userDetails.driversExpiryDate}`,
+    // driversLicense: `${userDetails.driversLicense}`,
+    // vehicleType: `${userDetails.vehicleType}`,
+    // nationalID: `${userDetails.nationalID}`,
+  };
 
-//   try {
-//     await updateDoc(doc(usersRef, userDetails.email), userDoc);
+  try {
+    await updateDoc(doc(usersRef, userDetails.email), userDoc);
 
-//     //Check if the email is valid
+    //Check if the email is valid
 
-//     let user = await getUser(db, userDetails.email);
+    let user = await getUser(db, userDetails.email);
 
-//     let response = {
-//       firstName: `${user.firstName}`,
-//       lastName: `${user.lastName}`,
-//       emergencyContact: `${user.emergencyContact}`,
-//       phoneNumber: `${user.phoneNumber}`,
-//       emergencyCell: `${user.emergencyCell}`,
-//       address: `${user.address}`,
-//       dob: `${user.dob}`,
-//       gender: `${user.gender}`,
-//       marriageStatus: `${user.marriageStatus}`,
-//       email: `${user.email}`,
-//       driversExpiryDate: `${user.driversExpiryDate}`,
-//       driversLicense: `${user.driversLicense}`,
-//       vehicleType: `${user.vehicleType}`,
-//       nationalID: `${user.nationalID}`,
-//       userStatus: "Registration Complete",
-//     };
+    let response = {
+      firstName: `${user.firstName}`,
+      lastName: `${user.lastName}`,
+      // emergencyContact: `${user.emergencyContact}`,
+      phoneNumber: `${user.phoneNumber}`,
+      // emergencyCell: `${user.emergencyCell}`,
+      // address: `${user.address}`,
+      // dob: `${user.dob}`,
+      // gender: `${user.gender}`,
+      // marriageStatus: `${user.marriageStatus}`,
+      email: `${user.email}`,
+      // driversExpiryDate: `${user.driversExpiryDate}`,
+      // driversLicense: `${user.driversLicense}`,
+      // vehicleType: `${user.vehicleType}`,
+      // nationalID: `${user.nationalID}`,
+      // userStatus: "Registration Complete",
+    };
 
-//     return response;
-//   } catch (error) {
-//     console.log(`Error is: ${error}`);
+    return response;
+  } catch (error) {
+    console.log(`Error is: ${error}`);
 
-//     const errorJson = {
-//       error,
-//     };
-//     return errorJson;
-//   }
-// }
+    const errorJson = {
+      error,
+    };
+    return errorJson;
+  }
+}
 
 
 
