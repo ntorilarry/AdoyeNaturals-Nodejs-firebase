@@ -185,13 +185,23 @@ async function getLoginUsers(db: any) {
 app.post(
   "/api/reset-password",
   async function (
-    req: { body: { email: any } },
+    req: {
+      body: {
+        password: any;
+        phoneNumber: any;
+        fullName: any;
+        email: any;
+      };
+    },
     res: { json: (arg0: any) => void }
   ) {
     console.log(req.body);
 
     const userMap = {
+      fullName: `${req.body.fullName}`,
       email: `${req.body.email}`,
+      phoneNumber: `${req.body.phoneNumber}`,
+      password: `${req.body.password}`,
     };
 
     const response = await resetPasswordUser(JSON.stringify(userMap));
@@ -205,42 +215,24 @@ async function resetPasswordUser(userJson: any) {
   const usersRef = collection(db, "users");
 
   const userMap = {
-    email: `${user.email}`
+    email: `${user.email}`,
+    newPassword: `${user.newPassword}`,
   };
 
-  const resetPassword = async (email) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
+  console.log(user);
 
-      console.log("Password reset email sent successfully!");
-    } catch (error) {
-      console.error("Error sending password reset email:", error);
-    }
-  };
+  try {
+    // Step 1: Send password reset email
+    await sendPasswordResetEmail(auth, user.email);
+    console.log("Password reset email sent successfully!");
 
-  // try {
-  //   //auth
-  //   await signInWithEmailAndPassword(auth, user.email, user.password);
-
-  //   //getting
-  //   let userDoc = await getUser(db, user.email);
-
-  //   userJson = {
-  //     fullName: `${userDoc.fullName}`,
-  //     email: `${userDoc.email}`,
-  //     phoneNumber: `${userDoc.phoneNumber}`,
-  //     userStatus: "Logged in",
-  //   };
-
-  //   return userJson;
-  // } catch (error) {
-  //   console.log(`Error is: ${error}`);
-
-  //   const errorJson = {
-  //     error,
-  //   };
-  //   return errorJson;
-  // }
+    // Step 2: Update the password in Firestore
+    // const userRef = doc(db, "users", user.email); // Assuming "users" is the collection and the document ID is the user's email
+    // await setDoc(userRef, { password: user.newPassword }, { merge: true });
+    // console.log("Password updated in Firestore successfully!");
+  } catch (error) {
+    console.error("Error resetting password and updating Firestore:", error);
+  }
 }
 
 app.get(
