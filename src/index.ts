@@ -194,15 +194,21 @@ app.post(
       email: `${req.body.email}`,
     };
 
-    const response = await resetPassword(JSON.stringify(userMap));
+    const response = await resetPasswordUser(JSON.stringify(userMap));
     console.log(`Reso: ${JSON.stringify(response)}`);
     res.json(response);
   }
 );
 
+async function resetPasswordUser(userJson: any) {
+  let user = JSON.parse(userJson);
+  const usersRef = collection(db, "users");
 
+  const userMap = {
+    email: `${user.email}`
+  };
 
-  const resetPassword = async (email: any) => {
+  const resetPassword = async (email) => {
     try {
       await sendPasswordResetEmail(auth, email);
 
@@ -210,7 +216,7 @@ app.post(
     } catch (error) {
       console.error("Error sending password reset email:", error);
     }
-  
+  };
 
   // try {
   //   //auth
