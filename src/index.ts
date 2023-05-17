@@ -16,6 +16,7 @@ const {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   sendEmailVerification,
 } = require("firebase/auth");
 
@@ -46,7 +47,9 @@ app.get("/", function (req: any, res: { send: (arg0: string) => void }) {
 app.post(
   "/api/register",
   async function (
-    req: { body: { fullName: any; email: any; phoneNumber: any; password: any } },
+    req: {
+      body: { fullName: any; email: any; phoneNumber: any; password: any };
+    },
     res: { json: (arg0: any) => void }
   ) {
     console.log(req.body);
@@ -179,6 +182,60 @@ async function getLoginUsers(db: any) {
   return products;
 }
 
+app.post(
+  "/api/reset-password",
+  async function (
+    req: { body: { email: any } },
+    res: { json: (arg0: any) => void }
+  ) {
+    console.log(req.body);
+
+    const userMap = {
+      email: `${req.body.email}`,
+    };
+
+    const response = await resetPassword(JSON.stringify(userMap));
+    console.log(`Reso: ${JSON.stringify(response)}`);
+    res.json(response);
+  }
+);
+
+
+
+  const resetPassword = async (email: any) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+
+      console.log("Password reset email sent successfully!");
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+    }
+  
+
+  // try {
+  //   //auth
+  //   await signInWithEmailAndPassword(auth, user.email, user.password);
+
+  //   //getting
+  //   let userDoc = await getUser(db, user.email);
+
+  //   userJson = {
+  //     fullName: `${userDoc.fullName}`,
+  //     email: `${userDoc.email}`,
+  //     phoneNumber: `${userDoc.phoneNumber}`,
+  //     userStatus: "Logged in",
+  //   };
+
+  //   return userJson;
+  // } catch (error) {
+  //   console.log(`Error is: ${error}`);
+
+  //   const errorJson = {
+  //     error,
+  //   };
+  //   return errorJson;
+  // }
+}
 
 app.get(
   "/api/latest-products",
@@ -205,17 +262,17 @@ async function getProducts(db: any) {
   return products;
 }
 
-app.get('/api/latest-products/:id', async (req, res) => {
+app.get("/api/latest-products/:id", async (req, res) => {
   const id = req.params.id;
 
   // Use the `db` instance to fetch data from Firebase based on the ID
-  const docRef = doc(db, 'latest products', id);
+  const docRef = doc(db, "latest products", id);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     res.send(docSnap.data());
   } else {
-    res.status(404).send('Document not found');
+    res.status(404).send("Document not found");
   }
 });
 
@@ -244,59 +301,19 @@ async function getSoaps(db: any) {
   return products;
 }
 
-app.get('/api/soap/:id', async (req, res) => {
+app.get("/api/soap/:id", async (req, res) => {
   const id = req.params.id;
 
   // Use the `db` instance to fetch data from Firebase based on the ID
-  const docRef = doc(db, 'soap', id);
+  const docRef = doc(db, "soap", id);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     res.send(docSnap.data());
   } else {
-    res.status(404).send('Document not found');
+    res.status(404).send("Document not found");
   }
 });
-
-
-
-
-
-// async function registerUser(userMap: string) {
-//   let userDetails = JSON.parse(userMap);
-
-//   const usersRef = collection(db, "users");
-//   const userDoc = {
-//     email: `${userDetails.email}`,
-//   };
-
-//   try {
-//     await updateDoc(doc(usersRef, userDetails.email), userDoc);
-
-//     //Check if the email is valid
-
-//     let user = await getUser(db, userDetails.email);
-
-//     let response = {
-//       firstName: `${user.firstName}`,
-//       lastName: `${user.lastName}`,
-//       phoneNumber: `${user.phoneNumber}`,
-//       email: `${user.email}`,
-   
-//     };
-
-//     return response;
-//   } catch (error) {
-//     console.log(`Error is: ${error}`);
-
-//     const errorJson = {
-//       error,
-//     };
-//     return errorJson;
-//   }
-// }
-
-
 
 async function getUser(db: any, userEmail: any) {
   //if the email isn't valid here throw an error
@@ -312,20 +329,9 @@ async function getUser(db: any, userEmail: any) {
     console.log("No such document!");
     return;
   }
-
 }
-
-
-
-
-  // const usersCollection = collection(db, 'users');//Goes to Users collection
-  // const usersSnapshot = await getDocs(usersCollection);//Goes to Specific Document
-  // const usersList = usersSnapshot.docs.map(doc => doc.data());
-  // console.log(usersList);
-  // return usersList;
 
 app.listen(process.env.PORT || 3001, function () {
   console.log("Server running on port 3001");
 });
-export { };
-
+export {};
