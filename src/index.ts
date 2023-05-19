@@ -239,32 +239,32 @@ async function resetPasswordUser(userJson: any) {
   }
 }
 
-// app.get(
-//   "/api/latest-products",
-//   async function (req: { body: any }, res: { json: (arg0: any[]) => void }) {
-//     console.log(req.body);
-//     const response = await getProducts(db);
-//     console.log(`students: ${JSON.stringify(response)}`);
-//     res.json(response);
-//   }
+app.get(
+  "/api/latest-products",
+  async function (req: { body: any }, res: { json: (arg0: any[]) => void }) {
+    console.log(req.body);
+    const response = await getProducts(db);
+    console.log(`students: ${JSON.stringify(response)}`);
+    res.json(response);
+  }
 
   
-// );
+);
 
-// async function getProducts(db: any) {
-//   const products: any[] = [];
-//   const colRef = collection(db, "latest products");
-//   const querySnapshot = await getDocs(colRef);
-//   console.log(`Heeeee: ${querySnapshot}`);
-//   querySnapshot.forEach((doc: { id: any; data: () => any }) => {
-//     // doc.data() is never undefined for query doc snapshots
-//     console.log(doc.id, " => ", doc.data());
-//     products.push(doc.data());
-//   });
+async function getProducts(db: any) {
+  const products: any[] = [];
+  const colRef = collection(db, "latest products");
+  const querySnapshot = await getDocs(colRef);
+  console.log(`Heeeee: ${querySnapshot}`);
+  querySnapshot.forEach((doc: { id: any; data: () => any }) => {
+    // doc.data() is never undefined for query doc snapshots
+    console.log(doc.id, " => ", doc.data());
+    products.push(doc.data());
+  });
 
-//   console.log(`Applicants: ${products}`);
-//   return products;
-// }
+  console.log(`Applicants: ${products}`);
+  return products;
+}
 
 app.get("/api/latest-products/:id", async (req, res) => {
   const id = req.params.id;
@@ -281,7 +281,7 @@ app.get("/api/latest-products/:id", async (req, res) => {
 });
 
 
-app.get('/api/latest-products', async (req, res) => {
+app.get('/api/latest-products-pagination', async (req, res) => {
   try {
     const pageSize = req.query.pageSize; // Number of documents per page
     const startAfterDocumentId = req.query.startAfter || null; // Document ID to start pagination after
