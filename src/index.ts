@@ -234,7 +234,7 @@ async function resetPasswordUser(userJson: any) {
   }
 }
 
-app.get('/api/latest-products-pagination', async (req, res) => {
+app.get('/api/latest-products', async (req, res) => {
   try {
     const pageSize = req.query.pageSize; // Number of documents per page
     const startAfterDocumentId = req.query.startAfter || null; // Document ID to start pagination after
