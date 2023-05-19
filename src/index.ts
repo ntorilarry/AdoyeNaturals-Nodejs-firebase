@@ -11,6 +11,10 @@ const {
   getDoc,
   updateDoc,
   getDocs,
+  query,
+  limit,
+  startAfter,
+  orderBy,
 } = require("firebase/firestore");
 const {
   getAuth,
@@ -225,39 +229,54 @@ async function resetPasswordUser(userJson: any) {
     // Step 1: Send password reset email
     await sendPasswordResetEmail(auth, user.email);
     console.log("Password reset email sent successfully!");
-
-    // Step 2: Update the password in Firestore
-    // const userRef = doc(db, "users", user.email); // Assuming "users" is the collection and the document ID is the user's email
-    // await setDoc(userRef, { password: user.newPassword }, { merge: true });
-    // console.log("Password updated in Firestore successfully!");
   } catch (error) {
     console.error("Error resetting password and updating Firestore:", error);
   }
 }
 
-app.get(
-  "/api/latest-products",
-  async function (req: { body: any }, res: { json: (arg0: any[]) => void }) {
-    console.log(req.body);
-    const response = await getProducts(db);
-    console.log(`students: ${JSON.stringify(response)}`);
-    res.json(response);
+app.get('/api/latest-products-pagination', async (req, res) => {
+  try {
+    const pageSize = req.query.pageSize; // Number of documents per page
+    const startAfterDocumentId = req.query.startAfter || null; // Document ID to start pagination after
+
+    let q = query(collection(db, 'latest products'), orderBy('createdAt'), limit(pageSize));
+
+    if (startAfterDocumentId) {
+      const startAfterDoc = await getDocs(q);
+      q = query(collection(db, 'latest products'), orderBy('createdAt'), startAfter(startAfterDoc.docs[startAfterDoc.docs.length - 1]), limit(pageSize));
+    }
+
+    const querySnapshot = await getDocs(q);
+
+    const documents = [];
+    querySnapshot.forEach((doc) => {
+      documents.push(doc.data());
+    });
+
+    const lastVisibleDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+    res.json({
+      documents,
+      lastVisibleDocumentId: lastVisibleDocument?.id || null,
+    });
+  } catch (error) {
+    console.error('Error getting documents: ', error);
+    res.status(500).send('Error getting documents');
   }
-);
+});
 
-async function getProducts(db: any) {
-  const products: any[] = [];
-  const colRef = collection(db, "latest products");
-  const querySnapshot = await getDocs(colRef);
-  console.log(`Heeeee: ${querySnapshot}`);
-  querySnapshot.forEach((doc: { id: any; data: () => any }) => {
-    // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data());
-    products.push(doc.data());
-  });
+async function getDocuments(pageSize, nextPageToken) {
+  let query = db.collection('latest products').orderBy('createdAt');
 
-  console.log(`Applicants: ${products}`);
-  return products;
+  if (nextPageToken) {
+    const startAfterDoc = await db.collection('latest products').doc(nextPageToken).get();
+    query = query.startAfter(startAfterDoc);
+  }
+
+  query = query.limit(pageSize);
+
+  const querySnapshot = await query.get();
+  return querySnapshot;
 }
 
 app.get("/api/latest-products/:id", async (req, res) => {
@@ -274,44 +293,6 @@ app.get("/api/latest-products/:id", async (req, res) => {
   }
 });
 
-app.get(
-  "/api/soap",
-  async function (req: { body: any }, res: { json: (arg0: any[]) => void }) {
-    console.log(req.body);
-    const response = await getSoaps(db);
-    console.log(`students: ${JSON.stringify(response)}`);
-    res.json(response);
-  }
-);
-
-async function getSoaps(db: any) {
-  const products: any[] = [];
-  const colRef = collection(db, "soap");
-  const querySnapshot = await getDocs(colRef);
-  console.log(`soapy: ${querySnapshot}`);
-  querySnapshot.forEach((doc: { id: any; data: () => any }) => {
-    // doc.data() is never undefined for query doc snapshots
-    console.log(doc.id, " => ", doc.data());
-    products.push(doc.data());
-  });
-
-  console.log(`soaped: ${products}`);
-  return products;
-}
-
-app.get("/api/soap/:id", async (req, res) => {
-  const id = req.params.id;
-
-  // Use the `db` instance to fetch data from Firebase based on the ID
-  const docRef = doc(db, "soap", id);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    res.send(docSnap.data());
-  } else {
-    res.status(404).send("Document not found");
-  }
-});
 
 async function getUser(db: any, userEmail: any) {
   //if the email isn't valid here throw an error
